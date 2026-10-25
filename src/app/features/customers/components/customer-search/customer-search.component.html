@@ -1,0 +1,30 @@
+<section class="customer-search">
+  <input
+    type="search"
+    [formControl]="searchControl"
+    placeholder="Cerca per nome, cognome o codice fiscale (min 2 caratteri)"
+  />
+
+  @if (vm().isLoading) {
+    <p class="loading">Ricerca in corso…</p>
+  } @else {
+    <ul>
+      @for (c of vm().results; track c.id) {
+        <li>
+          <span class="name">{{ c.firstName }} {{ c.lastName }}</span>
+          <span class="fc">{{ c.fiscalCode }}</span>
+          @switch (c.accountType) {
+            @case ('PRIVATE') {
+              <span class="badge badge--private">Privato</span>
+            }
+            @case ('BUSINESS') {
+              <span class="badge badge--business">Business</span>
+            }
+          }
+        </li>
+      } @empty {
+        <li class="empty">Nessun cliente trovato</li>
+      }
+    </ul>
+  }
+</section>

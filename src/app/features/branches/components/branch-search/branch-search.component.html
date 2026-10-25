@@ -1,0 +1,73 @@
+<!-- branch-search.component.html -->
+<!-- Con toSignal() NON serve async pipe — vm è un Signal, si legge con vm() -->
+<!-- Template moderno: @if/@for/@empty (NO *ngIf/*ngFor/*ngIf="vm$ | async as vm") -->
+<section class="branch-search">
+  <header class="branch-search__header">
+    <h2>Cerca Filiale</h2>
+    <p>Digita città, indirizzo o CAP per trovare la filiale più vicina.</p>
+  </header>
+
+  <div class="branch-search__controls">
+    <input
+      type="search"
+      class="branch-search__input"
+      [formControl]="searchControl"
+      placeholder="Es. Milano, 20121, Via Roma..."
+      aria-label="Cerca filiale"
+      (keydown.enter)="onManualSearch()"
+    />
+    <button
+      type="button"
+      class="branch-search__button"
+      (click)="onManualSearch()"
+      aria-label="Cerca">
+      🔍
+    </button>
+  </div>
+
+  <!-- Stato: nessun termine inserito -->
+  @if (!vm().term && !vm().isLoading) {
+    <p class="branch-search__hint">
+      Inizia a digitare (minimo 2 caratteri) per cercare una filiale.
+    </p>
+  }
+
+  <!-- Stato: loading -->
+  @if (vm().isLoading) {
+    <div class="branch-search__state">
+      <span class="spinner"></span>
+      Sto cercando le filiali per "<strong>{{ vm().term }}</strong>"...
+    </div>
+  }
+
+  <!-- Stato: errore — mostra solo se non loading -->
+  @if (!vm().isLoading && vm().error) {
+    <p class="branch-search__state branch-search__state--error" role="alert">
+      ⚠ {{ vm().error }}
+    </p>
+  }
+
+  <!-- Stato: risultati o vuoto -->
+  @if (!vm().isLoading && !vm().error && vm().term) {
+    <ul class="branch-search__list" aria-label="Risultati ricerca filiali">
+      @for (branch of vm().results; track branch.id) {
+        <li class="branch-search__item">
+          <div class="branch-search__item-main">
+            <span class="name">{{ branch.name }}</span>
+            <span class="city">{{ branch.city }} ({{ branch.zipCode }})</span>
+          </div>
+          <div class="branch-search__item-meta">
+            <span class="address">{{ branch.address }}</span>
+            @if (branch.distanceKm != null) {
+              <span class="distance">~{{ branch.distanceKm }} km</span>
+            }
+          </div>
+        </li>
+      } @empty {
+        <li class="branch-search__empty">
+          Nessuna filiale trovata per "<strong>{{ vm().term }}</strong>".
+        </li>
+      }
+    </ul>
+  }
+</section>
